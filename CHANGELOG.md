@@ -2,7 +2,12 @@
 
 ## develop branch
 
-Nothing yet.
+### New
+
+* Added the basic exception hierarchy
+  - Added `Exxx_ArrayToolsException`
+  - Added `E4xx_ArrayToolsException`
+  - Added `E4xx_UnsupportedType`
 
 ## 1.0.0 - Thu 28th Jan 2016
 
