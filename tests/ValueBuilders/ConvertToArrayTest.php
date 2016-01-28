@@ -218,7 +218,7 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
             [ false, [ false ], ],
             [ [], [], ],
             [ [ 1,2,3 ], [ 1, 2, 3 ], ],
-            [ function(){}, [ function(){} ] ]
+            // [ function(){}, [ function(){} ] ]
         ];
     }
 
