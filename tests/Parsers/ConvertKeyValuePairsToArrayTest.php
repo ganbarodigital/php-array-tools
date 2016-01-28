@@ -34,34 +34,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   ArrayTools/ValueBuilders
+ * @package   ArrayTools/Parsers
  * @author    Stuart Herbert <stuherbert@ganbarodigital.com>
  * @copyright 2016-present Ganbaro Digital Ltd www.ganbarodigital.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://code.ganbarodigital.com/php-text-tools
  */
 
-namespace GanbaroDigital\ArrayTools\ValueBuilders;
+namespace GanbaroDigital\ArrayTools\Parsers;
 
 use ArrayObject;
+use GanbaroDigital\ArrayTools\Exceptions\E4xx_UnsupportedType;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
-// ----------------------------------------------------------------
-// setup your test
-
-// ----------------------------------------------------------------
-// perform the change
-
-// ----------------------------------------------------------------
-// test the results
-
-
-
 /**
- * @coversDefaultClass GanbaroDigital\ArrayTools\ValueBuilders\ConvertToArray
+ * @coversDefaultClass GanbaroDigital\ArrayTools\Parsers\ConvertKeyValuePairsToArray
  */
-class ConvertToArrayTest extends PHPUnit_Framework_TestCase
+class ConvertKeyValuePairsToArrayTest extends PHPUnit_Framework_TestCase
 {
     public function testCanInstantiate()
     {
@@ -71,29 +61,29 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
         // ----------------------------------------------------------------
         // perform the change
 
-        $unit = new ConvertToArray;
+        $unit = new ConvertKeyValuePairsToArray;
 
         // ----------------------------------------------------------------
         // test the results
 
-        $this->assertInstanceOf(ConvertToArray::class, $unit);
+        $this->assertInstanceOf(ConvertKeyValuePairsToArray::class, $unit);
     }
 
     /**
      * @covers ::__invoke
      * @dataProvider provideDataToConvert
      */
-    public function testCanUseAsObject($data, $expectedResult)
+    public function testCanUseAsObject($data, $kvSeparator, $valueSeparator, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ConvertKeyValuePairsToArray;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $kvSeparator, $valueSeparator);
 
         // ----------------------------------------------------------------
         // test the results
@@ -105,7 +95,7 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
      * @covers ::from
      * @dataProvider provideDataToConvert
      */
-    public function testCanCallStatically($data, $expectedResult)
+    public function testCanCallStatically($data, $kvSeparator, $valueSeparator, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
@@ -113,7 +103,7 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = ConvertToArray::from($data);
+        $actualResult = ConvertKeyValuePairsToArray::from($data, $kvSeparator, $valueSeparator);
 
         // ----------------------------------------------------------------
         // test the results
@@ -122,43 +112,20 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::fromArray
-     * @dataProvider provideArraysToConvert
+     * @covers ::fromString
+     * @dataProvider provideStringsToConvert
      */
-    public function testArraysAreReturnedUnchanged($data, $expectedResult)
+    public function testStringsAreConvertedToArrays($data, $kvSeparator, $valueSeparator, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ConvertKeyValuePairsToArray;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
-
-        // ----------------------------------------------------------------
-        // test the results
-
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-
-    /**
-     * @covers ::fromNull
-     */
-    public function testNullIsConvertedToEmptyArray()
-    {
-        // ----------------------------------------------------------------
-        // setup your test
-
-        $unit = new ConvertToArray;
-        $data = null;
-        $expectedResult = [];
-
-        // ----------------------------------------------------------------
-        // perform the change
-
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $kvSeparator, $valueSeparator);
 
         // ----------------------------------------------------------------
         // test the results
@@ -170,17 +137,17 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
      * @covers ::fromTraversable
      * @dataProvider provideTraversablesToConvert
      */
-    public function testTraversablesAreConvertedToArray($data, $expectedResult)
+    public function testTraversablesHaveTheirContentsConverted($data, $kvSeparator, $valueSeparator, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ConvertKeyValuePairsToArray;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $kvSeparator, $valueSeparator);
 
         // ----------------------------------------------------------------
         // test the results
@@ -190,61 +157,54 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers ::nothingMatchesTheInputType
+     * @expectedException GanbaroDigital\ArrayTools\Exceptions\E4xx_UnsupportedType
      * @dataProvider provideEverythingElseToConvert
      */
-    public function testEverythingElseIsWrappedInAnArray($data, $expectedResult)
+    public function testEverythingElseIsRejected($data, $kvSeparator, $valueSeparator)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ConvertKeyValuePairsToArray;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $kvSeparator, $valueSeparator);
 
         // ----------------------------------------------------------------
         // test the results
-
-        $this->assertEquals($expectedResult, $actualResult);
     }
 
     public function provideDataToConvert()
     {
-        return [
-            [ null, [], ],
-            [ true, [ true ], ],
-            [ false, [ false ], ],
-            [ [], [], ],
-            [ [ 1,2,3 ], [ 1, 2, 3 ], ],
-            // [ function(){}, [ function(){} ] ]
-        ];
+        return array_merge(
+            $this->provideStringsToConvert(),
+            $this->provideTraversablesToConvert()
+        );
     }
 
-    public function provideArraysToConvert()
+    public function provideStringsToConvert()
     {
         return [
-            [ [], [], ],
-            [ [ 1,2,3 ], [ 1, 2, 3 ], ],
-            [ [ 'hello' => 'world'], [ 'hello' => 'world'] ],
+            [ "scope global interface lo eth0", ' ', ' ', [ 'scope' => 'global', 'interface' => 'lo'] ],
+            [ "scope global interface lo", ' ', ' ', [ 'scope' => 'global', 'interface' => 'lo'] ],
         ];
     }
 
     public function provideTraversablesToConvert()
     {
         return [
-            [ new ArrayObject(["hello" => "world"]), [ "hello" => "world" ] ],
-            [ (object)['hello' => 'world'], ['hello' => 'world'] ],
+            [ new ArrayObject([ "scope global interface lo"]), ' ', ' ', [[ 'scope' => 'global', 'interface' => 'lo']] ],
+            [ (object)[ "scope global interface lo"], ' ', ' ', [[ 'scope' => 'global', 'interface' => 'lo']] ],
         ];
     }
 
     public function provideEverythingElseToConvert()
     {
         return [
-            [ true, [ true ], ],
-            [ false, [ false ], ],
-            [ "hello, world", [ "hello, world" ] ],
+            [ true, ' ', ' ' ],
+            [ false, ' ', ' ' ],
         ];
     }
 }

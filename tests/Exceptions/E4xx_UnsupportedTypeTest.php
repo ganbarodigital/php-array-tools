@@ -34,217 +34,194 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   ArrayTools/ValueBuilders
+ * @package   TextTools/Exceptions
  * @author    Stuart Herbert <stuherbert@ganbarodigital.com>
  * @copyright 2016-present Ganbaro Digital Ltd www.ganbarodigital.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link      http://code.ganbarodigital.com/php-text-tools
+ * @link      http://code.ganbarodigital.com/php-array-tools
  */
 
-namespace GanbaroDigital\ArrayTools\ValueBuilders;
+namespace GanbaroDigital\ArrayTools\Exceptions;
 
-use ArrayObject;
 use PHPUnit_Framework_TestCase;
+use RuntimeException;
 use stdClass;
 
-// ----------------------------------------------------------------
-// setup your test
-
-// ----------------------------------------------------------------
-// perform the change
-
-// ----------------------------------------------------------------
-// test the results
-
-
-
 /**
- * @coversDefaultClass GanbaroDigital\ArrayTools\ValueBuilders\ConvertToArray
+ * @coversDefaultClass GanbaroDigital\ArrayTools\Exceptions\E4xx_UnsupportedType
  */
-class ConvertToArrayTest extends PHPUnit_Framework_TestCase
+class E4xx_UnsupportedTypeTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers ::__construct
+     */
     public function testCanInstantiate()
     {
         // ----------------------------------------------------------------
         // setup your test
 
+        $type = "NULL";
+
         // ----------------------------------------------------------------
         // perform the change
 
-        $unit = new ConvertToArray;
+        $obj = new E4xx_UnsupportedType($type);
 
         // ----------------------------------------------------------------
         // test the results
 
-        $this->assertInstanceOf(ConvertToArray::class, $unit);
+        $this->assertTrue($obj instanceof E4xx_UnsupportedType);
     }
 
     /**
-     * @covers ::__invoke
-     * @dataProvider provideDataToConvert
+     * @covers ::__construct
      */
-    public function testCanUseAsObject($data, $expectedResult)
+    public function testIsE4xx_ArrayToolsException()
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $type = "NULL";
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $obj = new E4xx_UnsupportedType($type);
 
         // ----------------------------------------------------------------
         // test the results
 
-        $this->assertEquals($expectedResult, $actualResult);
+        $this->assertTrue($obj instanceof E4xx_ArrayToolsException);
     }
 
     /**
-     * @covers ::from
-     * @dataProvider provideDataToConvert
+     * @covers ::__construct
      */
-    public function testCanCallStatically($data, $expectedResult)
+    public function testIsExxx_ArrayToolsException()
     {
         // ----------------------------------------------------------------
         // setup your test
 
+        $type = "NULL";
+
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = ConvertToArray::from($data);
+        $obj = new E4xx_UnsupportedType($type);
 
         // ----------------------------------------------------------------
         // test the results
 
-        $this->assertEquals($expectedResult, $actualResult);
+        $this->assertTrue($obj instanceof Exxx_ArrayToolsException);
     }
 
     /**
-     * @covers ::fromArray
-     * @dataProvider provideArraysToConvert
+     * @covers ::__construct
      */
-    public function testArraysAreReturnedUnchanged($data, $expectedResult)
+    public function testIsRuntimeException()
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $type = "NULL";
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $obj = new E4xx_UnsupportedType($type);
 
         // ----------------------------------------------------------------
         // test the results
 
-        $this->assertEquals($expectedResult, $actualResult);
+        $this->assertTrue($obj instanceof RuntimeException);
     }
 
     /**
-     * @covers ::fromNull
+     * @covers ::__construct
+     * @covers ::ensureString
+     * @dataProvider provideListOfPhpTypes
      */
-    public function testNullIsConvertedToEmptyArray()
+    public function testAutomaticallyHandlesTypesPassedIn($item)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
-        $data = null;
-        $expectedResult = [];
+        $expectedType = is_string($item)? $item : gettype($item);
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $obj = new E4xx_UnsupportedType($item);
 
         // ----------------------------------------------------------------
         // test the results
 
-        $this->assertEquals($expectedResult, $actualResult);
+        $actualArgs = $obj->getMessageData();
+        $this->assertEquals($expectedType, $actualArgs['type']);
     }
 
-    /**
-     * @covers ::fromTraversable
-     * @dataProvider provideTraversablesToConvert
-     */
-    public function testTraversablesAreConvertedToArray($data, $expectedResult)
-    {
-        // ----------------------------------------------------------------
-        // setup your test
-
-        $unit = new ConvertToArray;
-
-        // ----------------------------------------------------------------
-        // perform the change
-
-        $actualResult = $unit($data);
-
-        // ----------------------------------------------------------------
-        // test the results
-
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-
-    /**
-     * @covers ::nothingMatchesTheInputType
-     * @dataProvider provideEverythingElseToConvert
-     */
-    public function testEverythingElseIsWrappedInAnArray($data, $expectedResult)
-    {
-        // ----------------------------------------------------------------
-        // setup your test
-
-        $unit = new ConvertToArray;
-
-        // ----------------------------------------------------------------
-        // perform the change
-
-        $actualResult = $unit($data);
-
-        // ----------------------------------------------------------------
-        // test the results
-
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-
-    public function provideDataToConvert()
+    public function provideListOfPhpTypes()
     {
         return [
-            [ null, [], ],
-            [ true, [ true ], ],
-            [ false, [ false ], ],
-            [ [], [], ],
-            [ [ 1,2,3 ], [ 1, 2, 3 ], ],
-            // [ function(){}, [ function(){} ] ]
+            [ null ],
+            [ true ],
+            [ false ],
+            [ [ 'alfred' ] ],
+            [ 3.1415927 ],
+            [ 100 ],
+            [ new \stdClass ],
+            [ "hello, world!" ]
         ];
     }
 
-    public function provideArraysToConvert()
+    /**
+     * @covers ::__construct
+     * @covers ::getCaller
+     */
+    public function testAutomaticallyWorksOutWhoIsThrowingTheException()
     {
-        return [
-            [ [], [], ],
-            [ [ 1,2,3 ], [ 1, 2, 3 ], ],
-            [ [ 'hello' => 'world'], [ 'hello' => 'world'] ],
+        // ----------------------------------------------------------------
+        // setup your test
+
+        $expectedCaller = [
+            get_class($this),
+            'testAutomaticallyWorksOutWhoIsThrowingTheException',
         ];
+
+        // ----------------------------------------------------------------
+        // perform the change
+
+        $obj = new E4xx_UnsupportedType("NULL");
+
+        // ----------------------------------------------------------------
+        // test the results
+
+        $actualArgs = $obj->getMessageData();
+        $this->assertEquals($expectedCaller[0], $actualArgs['caller'][0]);
+        $this->assertEquals($expectedCaller[1], $actualArgs['caller'][1]);
     }
 
-    public function provideTraversablesToConvert()
+    /**
+     * @covers ::__construct
+     * @covers ::buildErrorMessage
+     */
+    public function testAutomaticallyAddsThrowerDetailsIntoExceptionMessage()
     {
-        return [
-            [ new ArrayObject(["hello" => "world"]), [ "hello" => "world" ] ],
-            [ (object)['hello' => 'world'], ['hello' => 'world'] ],
-        ];
-    }
+        // ----------------------------------------------------------------
+        // setup your test
 
-    public function provideEverythingElseToConvert()
-    {
-        return [
-            [ true, [ true ], ],
-            [ false, [ false ], ],
-            [ "hello, world", [ "hello, world" ] ],
-        ];
+        $expectedMessage = "type 'NULL' is not supported by "
+            .get_class($this)
+            .'::testAutomaticallyAddsThrowerDetailsIntoExceptionMessage';
+
+        // ----------------------------------------------------------------
+        // perform the change
+
+        $obj = new E4xx_UnsupportedType("NULL");
+
+        // ----------------------------------------------------------------
+        // test the results
+
+        $this->assertEquals($expectedMessage, $obj->getMessage());
     }
 }
