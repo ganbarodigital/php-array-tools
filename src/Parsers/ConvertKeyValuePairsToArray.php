@@ -94,8 +94,8 @@ class ConvertKeyValuePairsToArray
      *         the separator between keys and values
      * @param  string $valueSeparator
      *         the separator between values and the next key
-     * @return mixed
-     *         will return the same time that $data was
+     * @return array
+     *         a list of the key/value pairs
      */
     private static function fromTraversable($data, $kvSeparator, $valueSeparator)
     {
@@ -120,8 +120,8 @@ class ConvertKeyValuePairsToArray
      *         the separator between keys and values
      * @param  string $valueSeparator
      *         the separator between values and the next key
-     * @return string
-     *         will return the same time that $data was
+     * @return array
+     *         a list of the key/value pairs
      */
     private static function fromString($data, $kvSeparator, $valueSeparator)
     {
