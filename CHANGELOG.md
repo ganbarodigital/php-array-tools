@@ -2,6 +2,10 @@
 
 ## develop branch
 
+Nothing yet.
+
+## 1.1.0 - Thu 28th Jan 2016
+
 ### New
 
 * Added the basic exception hierarchy
