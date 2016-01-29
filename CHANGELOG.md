@@ -2,6 +2,10 @@
 
 ## develop branch
 
+Nothing yet.
+
+## 1.2.0 - Fri 29th Jan 2016
+
 ### New
 
 * Added support for extracting the first entry from a list
