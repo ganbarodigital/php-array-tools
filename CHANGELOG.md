@@ -2,7 +2,10 @@
 
 ## develop branch
 
-Nothing yet.
+### New
+
+* Added support for extracting the first entry from a list
+  - Added `Filters\ExtractFirstItem`
 
 ## 1.1.0 - Thu 28th Jan 2016
 
