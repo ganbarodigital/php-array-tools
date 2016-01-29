@@ -38,7 +38,7 @@
  * @author    Stuart Herbert <stuherbert@ganbarodigital.com>
  * @copyright 2016-present Ganbaro Digital Ltd www.ganbarodigital.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @link      http://code.ganbarodigital.com/php-text-tools
+ * @link      http://code.ganbarodigital.com/php-array-tools
  */
 
 namespace GanbaroDigital\ArrayTools\ValueBuilders;
