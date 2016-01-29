@@ -34,102 +34,108 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   ArrayTools/ValueBuilders
+ * @package   ArrayTools/Filters
  * @author    Stuart Herbert <stuherbert@ganbarodigital.com>
  * @copyright 2016-present Ganbaro Digital Ltd www.ganbarodigital.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://code.ganbarodigital.com/php-array-tools
  */
 
-namespace GanbaroDigital\ArrayTools\ValueBuilders;
+namespace GanbaroDigital\ArrayTools\Filters;
 
 use GanbaroDigital\Reflection\Maps\MapTypeToMethod;
 use Traversable;
 
-class ConvertToArray
+class ExtractFirstItem
 {
     /**
-     * convert a piece of data to be a real PHP array
+     * extract the first item from a dataset
      *
      * @param  mixed $data
-     *         the data to convert
-     * @return array
+     *         the data to filter
+     * @param  mixed $default
+     *         the data to return when we cannot filter $data
+     * @return mixed
      */
-    public function __invoke($data)
+    public function __invoke($data, $default)
     {
-        return self::from($data);
+        return self::from($data, $default);
     }
 
     /**
-     * convert a piece of data to be a real PHP array
+     * extract the first item from a dataset
      *
      * @param  mixed $data
-     *         the data to convert
-     * @return array
+     *         the data to filter
+     * @param  mixed $default
+     *         the data to return when we cannot filter $data
+     * @return mixed
      */
-    public static function from($data)
+    public static function from($data, $default)
     {
         $method = MapTypeToMethod::using($data, self::$dispatchMap);
-        return self::$method($data);
+        return self::$method($data, $default);
     }
 
     /**
-     * convert a piece of data to be a real PHP array
+     * extract the first item from a dataset held in a string
      *
-     * @param  array $data
-     *         the data to convert
-     * @return array
-     */
-    private static function fromArray($data)
-    {
-        // no conversion required :)
-        return $data;
-    }
-
-    /**
-     * convert a piece of data to be a real PHP array
+     * we take a very simplistic approach here, and assume that the string
+     * contains space-separated data
      *
-     * @param  null $data
-     *         the data to convert
-     * @return array
+     * @param  string $data
+     *         the data to filter
+     * @param  mixed $default
+     *         the data to return when we cannot filter $data
+     * @return mixed
      */
-    private static function fromNull($data)
+    private static function fromString($data, $default)
     {
-        // we convert NULL into an empty array
-        return [];
-    }
-
-    /**
-     * convert a piece of data to be a real PHP array
-     *
-     * @param  Traversable $data
-     *         the data to convert
-     * @return array
-     */
-    private static function fromTraversable($data)
-    {
-        // we're going to convert our input data into a real PHP array
-        $retval = [];
-
-        // build our real array
-        foreach ($data as $key => $item) {
-            $retval[$key] = $item;
+        // special case - $data is empty
+        if (trim($data) === '') {
+            return $default;
         }
 
-        // all done :)
-        return $retval;
+        // treat it as a whitespace-separated string
+        $parts = explode(' ', $data);
+        return self::fromTraversable($parts, $default);
     }
 
     /**
-     * convert a piece of data to be a real PHP array
+     * extract the first item from a dataset
+     *
+     * @param  array|Traversable $data
+     *         the data to filter
+     * @param  mixed $default
+     *         the data to return when we cannot filter $data
+     * @return mixed
+     */
+    private static function fromTraversable($data, $default)
+    {
+        // return the first item available in $data
+        //
+        // we use a foreach() loop here because it is compatible with
+        // both arrays and iterators
+        foreach ($data as $item) {
+            return $item;
+        }
+
+        // if we get here, then $data was empty
+        return $default;
+    }
+
+    /**
+     * called when we've been given a data type we do not support
      *
      * @param  mixed $data
-     *         the data to convert
-     * @return array
+     *         the data to filter
+     * @param  mixed $default
+     *         the data to return when we cannot filter $data
+     * @return mixed
      */
-    private static function nothingMatchesTheInputType($data)
+    private static function nothingMatchesTheInputType($data, $default)
     {
-        return [ $data ];
+        return $default;
     }
 
     /**
@@ -138,8 +144,7 @@ class ConvertToArray
      * @var array
      */
     private static $dispatchMap = [
-        'Array' => 'fromArray',
-        'NULL' => 'fromNull',
+        'String' => 'fromString',
         'Traversable' => 'fromTraversable'
     ];
 }

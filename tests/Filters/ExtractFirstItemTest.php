@@ -34,34 +34,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Libraries
- * @package   ArrayTools/ValueBuilders
+ * @package   ArrayTools/Filters
  * @author    Stuart Herbert <stuherbert@ganbarodigital.com>
  * @copyright 2016-present Ganbaro Digital Ltd www.ganbarodigital.com
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link      http://code.ganbarodigital.com/php-array-tools
  */
 
-namespace GanbaroDigital\ArrayTools\ValueBuilders;
+namespace GanbaroDigital\ArrayTools\Filters;
 
 use ArrayObject;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
-// ----------------------------------------------------------------
-// setup your test
-
-// ----------------------------------------------------------------
-// perform the change
-
-// ----------------------------------------------------------------
-// test the results
-
-
-
 /**
- * @coversDefaultClass GanbaroDigital\ArrayTools\ValueBuilders\ConvertToArray
+ * @coversDefaultClass GanbaroDigital\ArrayTools\Filters\ExtractFirstItem
  */
-class ConvertToArrayTest extends PHPUnit_Framework_TestCase
+class ExtractFirstItemTest extends PHPUnit_Framework_TestCase
 {
     public function testCanInstantiate()
     {
@@ -71,29 +60,29 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
         // ----------------------------------------------------------------
         // perform the change
 
-        $unit = new ConvertToArray;
+        $unit = new ExtractFirstItem;
 
         // ----------------------------------------------------------------
         // test the results
 
-        $this->assertInstanceOf(ConvertToArray::class, $unit);
+        $this->assertInstanceOf(ExtractFirstItem::class, $unit);
     }
 
     /**
      * @covers ::__invoke
-     * @dataProvider provideDataToConvert
+     * @dataProvider provideDataToFilter
      */
-    public function testCanUseAsObject($data, $expectedResult)
+    public function testCanUseAsObject($data, $default, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ExtractFirstItem;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $default);
 
         // ----------------------------------------------------------------
         // test the results
@@ -103,9 +92,9 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers ::from
-     * @dataProvider provideDataToConvert
+     * @dataProvider provideDataToFilter
      */
-    public function testCanCallStatically($data, $expectedResult)
+    public function testCanCallStatically($data, $default, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
@@ -113,7 +102,7 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = ConvertToArray::from($data);
+        $actualResult = ExtractFirstItem::from($data, $default);
 
         // ----------------------------------------------------------------
         // test the results
@@ -122,43 +111,20 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::fromArray
-     * @dataProvider provideArraysToConvert
+     * @covers ::fromString
+     * @dataProvider provideStringsToFilter
      */
-    public function testArraysAreReturnedUnchanged($data, $expectedResult)
+    public function testStringsAreTreatedAsSpaceSeparated($data, $default, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ExtractFirstItem;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
-
-        // ----------------------------------------------------------------
-        // test the results
-
-        $this->assertEquals($expectedResult, $actualResult);
-    }
-
-    /**
-     * @covers ::fromNull
-     */
-    public function testNullIsConvertedToEmptyArray()
-    {
-        // ----------------------------------------------------------------
-        // setup your test
-
-        $unit = new ConvertToArray;
-        $data = null;
-        $expectedResult = [];
-
-        // ----------------------------------------------------------------
-        // perform the change
-
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $default);
 
         // ----------------------------------------------------------------
         // test the results
@@ -168,19 +134,42 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers ::fromTraversable
-     * @dataProvider provideTraversablesToConvert
+     * @dataProvider provideTraversablesToFilter
      */
-    public function testTraversablesAreConvertedToArray($data, $expectedResult)
+    public function testTraversablesHaveTheirFirstEntryReturned($data, $default, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ExtractFirstItem;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $default);
+
+        // ----------------------------------------------------------------
+        // test the results
+
+        $this->assertEquals($expectedResult, $actualResult);
+    }
+
+    /**
+     * @covers ::fromString
+     * @covers ::fromTraversable
+     * @dataProvider provideEmptyDataToFilter
+     */
+    public function testDefaultDataIsReturnedWhenTraversableIsEmpty($data, $default, $expectedResult)
+    {
+        // ----------------------------------------------------------------
+        // setup your test
+
+        $unit = new ExtractFirstItem;
+
+        // ----------------------------------------------------------------
+        // perform the change
+
+        $actualResult = $unit($data, $default);
 
         // ----------------------------------------------------------------
         // test the results
@@ -190,19 +179,19 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers ::nothingMatchesTheInputType
-     * @dataProvider provideEverythingElseToConvert
+     * @dataProvider provideEverythingElseToFilter
      */
-    public function testEverythingElseIsWrappedInAnArray($data, $expectedResult)
+    public function testDefaultDataIsReturnedWhenWeCannotFilter($data, $default, $expectedResult)
     {
         // ----------------------------------------------------------------
         // setup your test
 
-        $unit = new ConvertToArray;
+        $unit = new ExtractFirstItem;
 
         // ----------------------------------------------------------------
         // perform the change
 
-        $actualResult = $unit($data);
+        $actualResult = $unit($data, $default);
 
         // ----------------------------------------------------------------
         // test the results
@@ -210,41 +199,51 @@ class ConvertToArrayTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expectedResult, $actualResult);
     }
 
-    public function provideDataToConvert()
+    public function provideDataToFilter()
+    {
+        return array_merge(
+            $this->provideStringsToFilter(),
+            $this->provideTraversablesToFilter(),
+            $this->provideEmptyDataToFilter(),
+            $this->provideEverythingElseToFilter()
+        );
+    }
+
+    public function provideStringsToFilter()
     {
         return [
-            [ null, [], ],
-            [ true, [ true ], ],
-            [ false, [ false ], ],
-            [ [], [], ],
-            [ [ 1,2,3 ], [ 1, 2, 3 ], ],
-            // [ function(){}, [ function(){} ] ]
+            [ "scope global interface lo eth0", null, 'scope' ],
+            [ "scope global interface lo", null, 'scope' ],
         ];
     }
 
-    public function provideArraysToConvert()
+    public function provideTraversablesToFilter()
     {
         return [
-            [ [], [], ],
-            [ [ 1,2,3 ], [ 1, 2, 3 ], ],
-            [ [ 'hello' => 'world'], [ 'hello' => 'world'] ],
+            [ new ArrayObject(["scope", "global", "interface lo"]), null, 'scope' ],
+            [ (object)[ "global interface", "lo"], null, "global interface" ],
         ];
     }
 
-    public function provideTraversablesToConvert()
+    public function provideEmptyDataToFilter()
     {
         return [
-            [ new ArrayObject(["hello" => "world"]), [ "hello" => "world" ] ],
-            [ (object)['hello' => 'world'], ['hello' => 'world'] ],
+            [ new ArrayObject([]), 'hello', 'hello' ],
+            [ (object)[], 'hello', 'hello' ],
+            [ '', 'hello', 'hello' ]
         ];
     }
 
-    public function provideEverythingElseToConvert()
+    public function provideEverythingElseToFilter()
     {
         return [
-            [ true, [ true ], ],
-            [ false, [ false ], ],
-            [ "hello, world", [ "hello, world" ] ],
+            [ true, 'hello', 'hello' ],
+            [ false, 'hello', 'hello' ],
+            [ 0.0, 'hello', 'hello' ],
+            [ 3.1415927, 'hello', 'hello' ],
+            [ 0, 'hello', 'hello' ],
+            [ 100, 'hello', 'hello' ],
+            [ STDIN, 'hello', 'hello' ]
         ];
     }
 }
