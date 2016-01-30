@@ -252,8 +252,8 @@ class ExtractFirstItemWithContentTest extends PHPUnit_Framework_TestCase
     public function provideTraversablesWithEmptyFirstItemToFilter()
     {
         return [
-            [ new ArrayObject(["", "global", "interface lo"]), null, null ],
-            [ (object)[ " ", "global interface", "lo"], null, null ],
+            [ new ArrayObject(["", "global", "interface lo"]), null, "global" ],
+            [ (object)[ " ", "global interface", "lo"], null, "global interface" ],
         ];
     }
 
