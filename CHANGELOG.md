@@ -2,6 +2,8 @@
 
 ## develop branch
 
+## 1.3.0 - Sun 31st Jan 2016
+
 ### New
 
 * Added support for extracting the first non-empty entry from a list
