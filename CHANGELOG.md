@@ -2,7 +2,12 @@
 
 ## develop branch
 
-Nothing yet.
+## 1.3.0 - Sun 31st Jan 2016
+
+### New
+
+* Added support for extracting the first non-empty entry from a list
+  - Added `Filters\ExtractFirstItemWithContent`
 
 ## 1.2.0 - Fri 29th Jan 2016
 
